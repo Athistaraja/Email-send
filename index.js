@@ -1,48 +1,58 @@
+require("dotenv").config();
 const express = require("express");
 const nodemailer = require("nodemailer");
-const bodyParser = require("body-parser");
 const cors = require("cors");
-require("dotenv").config(); // Load environment variables
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;
 
 // Middleware
-app.use(express.json());
+app.use(cors()); // Allow cross-origin requests
+app.use(express.json()); // Parse JSON requests
 
-// Email Configuration
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL, // Email from .env file
-    pass: process.env.PASSWORD, // Password from .env file
-  },
-});
-
-// Test Route to Send Email
+// Email Sending Route
 app.post("/send-email", async (req, res) => {
-  const { to, subject, text } = req.body;
-
-  const mailOptions = {
-    from: process.env.EMAIL,
-    to,
-    subject,
-    text,
-  };
+  const { name, email, message } = req.body;
 
   try {
+    // Create a transporter
+    const transporter = nodemailer.createTransport({
+      service: "gmail", // Use Gmail as the email provider
+      auth: {
+        user: process.env.EMAIL, // Your email from .env
+        pass: process.env.PASSWORD, // App password from .env
+      },
+    });
+
+    // Email content
+    const mailOptions = {
+      from: `Portfolio Contact Form <${process.env.EMAIL}>`, // Use your verified email
+      replyTo: email, // Client's email address (dynamic)
+      to: process.env.RECIPIENT_EMAIL, // Your email to receive messages
+      subject: `New Contact Form Submission from ${name}`,
+      text: `
+        You received a new message from your portfolio website:
+        
+        Name: ${name}
+        Email: ${email}
+        Message: ${message}
+      `,
+    };
+
+    // Send the email
     await transporter.sendMail(mailOptions);
-    res.status(200).json({ message: "Email sent successfully!" });
+
+    res.status(200).json({ message: "Message sent successfully!" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to send email." });
+    console.error("Email sending error:", error.message);
+    res.status(500).json({ message: "Failed to send message." });
   }
 });
 
-app.get('/', (req, res) => {
-  res.send('Welcome to email API');
+app.get("/", (req,res) => {
+  res.sendsend('Welcome to the Email API');
 });
-// Start the Server
+// Start the server
 app.listen(PORT, () => {
-  console.log(`Server is running on: http://localhost:${PORT}`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
