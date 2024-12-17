@@ -50,7 +50,7 @@ app.post("/send-email", async (req, res) => {
 });
 
 app.get("/", (req,res) => {
-  res.sendsend('Welcome to the Email API');
+  res.send('Welcome to the Email API');
 });
 // Start the server
 app.listen(PORT, () => {
