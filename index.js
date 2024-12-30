@@ -2,27 +2,13 @@ require("dotenv").config();
 const express = require("express");
 const nodemailer = require("nodemailer");
 const cors = require("cors");
-const mongoose = require("mongoose");
 
 const app = express();
 const PORT = 5000;
 
 // Middleware
-app.use(cors());
-app.use(express.json());
-
-// Connect to MongoDB
-mongoose
-  .connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("MongoDB connection error:", err));
-
-// Visitor Schema
-const visitorSchema = new mongoose.Schema({
-  date: { type: Date, default: new Date() }
-});
-
-const Visitor = mongoose.model("Visitor", visitorSchema);
+app.use(cors()); // Allow cross-origin requests
+app.use(express.json()); // Parse JSON requests
 
 // Email Sending Route
 app.post("/send-email", async (req, res) => {
@@ -31,18 +17,18 @@ app.post("/send-email", async (req, res) => {
   try {
     // Create a transporter
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      service: "gmail", // Use Gmail as the email provider
       auth: {
-        user: process.env.EMAIL,
-        pass: process.env.PASSWORD,
+        user: process.env.EMAIL, // Your email from .env
+        pass: process.env.PASSWORD, // App password from .env
       },
     });
 
     // Email content
     const mailOptions = {
-      from: `Portfolio Contact Form <${process.env.EMAIL}>`,
-      replyTo: email,
-      to: process.env.RECIPIENT_EMAIL,
+      from: `Portfolio Contact Form <${process.env.EMAIL}>`, // Use your verified email
+      replyTo: email, // Client's email address (dynamic)
+      to: process.env.RECIPIENT_EMAIL, // Your email to receive messages
       subject: `New Contact Form Submission from ${name}`,
       text: `
         You received a new message from your portfolio website:
@@ -63,62 +49,9 @@ app.post("/send-email", async (req, res) => {
   }
 });
 
-// Log visitor route
-app.post("/log-visitor", async (req, res) => {
-  try {
-    await Visitor.create({}); // Log a new visitor
-    res.status(201).json({ message: "Visitor logged successfully!" });
-  } catch (err) {
-    console.error("Error logging visitor:", err.message);
-    res.status(500).json({ message: "Failed to log visitor." });
-  }
+app.get("/", (req,res) => {
+  res.send('Welcome to the Email API');
 });
-
-// Get daily visitor count
-app.get("/daily-visitor-count", async (req, res) => {
-  try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Start of today
-
-    const count = await Visitor.countDocuments({ date: { $gte: today } });
-    res.json({ dailyCount: count });
-  } catch (err) {
-    console.error("Error fetching daily visitor count:", err.message);
-    res.status(500).json({ message: "Failed to fetch daily visitor count." });
-  }
-});
-
-// Get monthly visitor count
-app.get("/monthly-visitor-count", async (req, res) => {
-  try {
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1); // Set to the first day of the month
-    startOfMonth.setHours(0, 0, 0, 0); // Start of the month
-
-    const count = await Visitor.countDocuments({ date: { $gte: startOfMonth } });
-    res.json({ monthlyCount: count });
-  } catch (err) {
-    console.error("Error fetching monthly visitor count:", err.message);
-    res.status(500).json({ message: "Failed to fetch monthly visitor count." });
-  }
-});
-
-// Get overall visitor count
-app.get("/overall-visitor-count", async (req, res) => {
-  try {
-    const overallCount = await Visitor.countDocuments();
-    res.json({ overallCount });
-  } catch (err) {
-    console.error("Error fetching overall visitor count:", err.message);
-    res.status(500).json({ message: "Failed to fetch overall visitor count." });
-  }
-});
-
-// Home Route
-app.get("/", (req, res) => {
-  res.send("Welcome to the Email and Visitor API");
-});
-
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
