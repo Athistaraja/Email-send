@@ -40,18 +40,94 @@ app.post("/send-email", async (req, res) => {
   try {
     // Email Content
     const mailOptions = {
-      from: `Portfolio Contact Form <${process.env.EMAIL}>`, // Use your verified email
-      replyTo: email, // Client's email address
-      to: process.env.RECIPIENT_EMAIL, // Your email to receive messages
+      from: `Portfolio Contact Form <${process.env.EMAIL}>`,
+      replyTo: email,
+      to: process.env.RECIPIENT_EMAIL,
       subject: `New Contact Form Submission from ${name}`,
-      text: `
-        You received a new message from your portfolio website:
-
-        Name: ${name}
-        Email: ${email}
-        Message: ${message}
+      html: `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>New Contact Form Submission</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 0;
+              background-color: #f4f4f4;
+              color: #333;
+            }
+            .email-container {
+              max-width: 600px;
+              margin: 20px auto;
+              background-color: #ffffff;
+              border-radius: 8px;
+              overflow: hidden;
+              box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+            .email-header {
+              background-color: #4caf50;
+              color: #ffffff;
+              text-align: center;
+              padding: 20px;
+            }
+            .email-header h1 {
+              margin: 0;
+              font-size: 24px;
+              letter-spacing: 1px;
+            }
+            .email-body {
+              padding: 20px;
+            }
+            .email-body h2 {
+              color: #4caf50;
+              font-size: 20px;
+              margin-bottom: 15px;
+            }
+            .email-body p {
+              font-size: 16px;
+              line-height: 1.6;
+              margin-bottom: 10px;
+            }
+            .email-footer {
+              background-color: #f4f4f4;
+              text-align: center;
+              padding: 10px;
+              font-size: 14px;
+              color: #666;
+            }
+            .email-footer a {
+              color: #4caf50;
+              text-decoration: none;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="email-container">
+            <div class="email-header">
+              <h1>New Contact Form Submission</h1>
+            </div>
+            <div class="email-body">
+              <h2>Message Details:</h2>
+              <p><strong>Name:</strong> ${name}</p>
+              <p><strong>Email:</strong> ${email}</p>
+              <p><strong>Message:</strong></p>
+              <p style="background-color: #f9f9f9; padding: 15px; border-left: 4px solid #4caf50; margin: 10px 0;">
+                ${message}
+              </p>
+            </div>
+            <div class="email-footer">
+              <p>Thank you for reaching out. We will get back to you soon!</p>
+              <p><a href="https://yourwebsite.com">Visit our website</a></p>
+            </div>
+          </div>
+        </body>
+        </html>
       `,
     };
+    
 
     // Send the email
     await transporter.sendMail(mailOptions);
