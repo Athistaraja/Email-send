@@ -50,7 +50,7 @@ app.post("/send-email", async (req, res) => {
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>New Contact Form Submission</title>
+          <title>This Message from Portfolio</title>
           <style>
             body {
               font-family: Arial, sans-serif;
